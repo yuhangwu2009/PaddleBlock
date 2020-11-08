@@ -89,8 +89,18 @@ class Paddle:
         self.canvas.bind_all('<Right>', self.turn_right)
         self.canvas.bind_all('<Up>', self.speed_up)
         self.canvas.bind_all('<Down>', self.speed_down)
+        self.canvas.bind("<Motion>",self.mouse_hand)
         self.speed = 2
-    
+
+    def mouse_hand(self, evt):  # runs on mouse motion
+        pos = self.canvas.coords(self.id)
+        width = pos[2] - pos[0]
+        pos[0] = evt.x - width/2
+        pos[2] = pos[0] + width
+        self.x = 0
+        self.canvas.coords(self.id, pos)
+        self.canvas.config(cursor="none")
+
     def speed_up(self, evt):
         self.speed += 1
     def speed_down(self,evt):
