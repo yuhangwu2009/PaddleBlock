@@ -56,8 +56,8 @@ class Ball:
         while x < blocks:
             if self.block_list[x].shown:
                 block_pos = canvas.coords(self.block_list[x].id)
-                if pos[2] <= block_pos[2] and pos[0] >= block_pos[0]:
-                    if pos[1] == block_pos[3] and pos[3] == block_pos[1]:
+                if pos[2] >= block_pos[0] and pos[0] <= block_pos[2]:
+                    if pos[1] <= block_pos[3] and pos[3] >= block_pos[3]:
                         self.y = 1
                         block_list[x].hitted()
                         return True
@@ -70,8 +70,8 @@ class Ball:
         while x < blocks:
             if self.block_list[x].shown:
                 block_pos = canvas.coords(self.block_list[x].id)
-                if pos[2] <= block_pos[2] and pos[0] >= block_pos[0]:
-                    if pos[3] == block_pos[1] and pos[3] == block_pos[3]:
+                if pos[2] >= block_pos[0] and pos[0] <= block_pos[2]:
+                    if pos[3] >= block_pos[1] and pos[1] <= block_pos[1]:
                         self.y = -1
                         block_list[x].hitted()
                         return True
@@ -84,8 +84,8 @@ class Ball:
         while x < blocks:
             if self.block_list[x].shown:
                 block_pos = canvas.coords(self.block_list[x].id)
-                if pos[2] == block_pos[0] and pos[0] == block_pos[2]:
-                    if pos[1] >= block_pos[1] and pos[3] <= block_pos[3]:
+                if pos[3] <= block_pos[1] and pos[1] >= block_pos[3]:
+                    if pos[2] >= block_pos[0] and pos[0] <= block_pos[0]:
                         self.x = 1
                         block_list[x].hitted()
                         return True
@@ -98,8 +98,8 @@ class Ball:
         while x < blocks:
             if self.block_list[x].shown:
                 block_pos = canvas.coords(self.block_list[x].id)
-                if pos[2] == block_pos[0] and pos[2] == block_pos[2]:
-                    if pos[1] >= block_pos[1] and pos[3] <= block_pos[3]:
+                if pos[3] <= block_pos[1] and pos[1] >= block_pos[3]:
+                    if pos[0] <= block_pos[2] and pos[2] >= block_pos[2]:
                         self.x = -1
                         block_list[x].hitted()
                         return True
@@ -116,8 +116,11 @@ class Paddle:
         self.started = False
         self.canvas.bind_all('<Left>', self.turn_left)
         self.canvas.bind_all('<Right>', self.turn_right)
+        self.canvas.bind_all('<Up>', self.speed_up)
+        self.canvas.bind_all('<Down>', self.slow_down)
         self.canvas.bind("<Motion>",self.mouse_hand)
         self.canvas.bind_all('<Button-1>', self.start_game)
+        self.speed = 1
         
     def mouse_hand(self, evt):  # runs on mouse motion
         pos = self.canvas.coords(self.id)
@@ -129,10 +132,16 @@ class Paddle:
         self.canvas.config(cursor="none")
 
     def turn_left(self, evt):
-        self.x = -1
+        self.x = -speed
 
     def turn_right(self, evt):
-        self.x = 1
+        self.x = speed
+        
+    def speed_up(self, evt):
+        self.speed += 1
+        
+    def slow_down(self, evt):
+        self.speed -= 1
     
     def start_game(self, evt):
         self.started = True
