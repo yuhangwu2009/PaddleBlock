@@ -36,6 +36,7 @@ class Ball:
             
         if pos[3] >= self.canvas_height:
             self.hit_bottom = True
+            canvas.delete(self.id)
         if pos[0] <= 0:
             self.x = 1
         if pos[2] >= self.canvas_width:
@@ -116,8 +117,6 @@ class Paddle:
         self.started = False
         self.canvas.bind_all('<Left>', self.turn_left)
         self.canvas.bind_all('<Right>', self.turn_right)
-        self.canvas.bind_all('<Up>', self.speed_up)
-        self.canvas.bind_all('<Down>', self.slow_down)
         self.canvas.bind("<Motion>",self.mouse_hand)
         self.canvas.bind_all('<Button-1>', self.start_game)
         self.speed = 1
@@ -132,16 +131,10 @@ class Paddle:
         self.canvas.config(cursor="none")
 
     def turn_left(self, evt):
-        self.x = -speed
+        self.x = -1
 
     def turn_right(self, evt):
-        self.x = speed
-        
-    def speed_up(self, evt):
-        self.speed += 1
-        
-    def slow_down(self, evt):
-        self.speed -= 1
+        self.x = 1
     
     def start_game(self, evt):
         self.started = True
@@ -169,25 +162,51 @@ class Block:
         self.shown = True
         self.id = canvas.create_rectangle(x1, y1, width, height, fill=color)
 
+    def draw(self):
+        canvas.move(self.id, self.x, self.y)
+        ball2.draw()
     def hitted(self):
-        canvas.delete(self.id)
-        self.shown = False
+        if self.color == 'brown':
+            canvas.delete(self.id)
+            self.shown = False
+        if self.color == 'silver':
+            self.color = 'brown'
+            canvas.delete(self.id)
+            self.id = canvas.create_rectangle(self.x1, self.y1, self.width, self.height, fill=self.color)
+        if self.color == 'gold':
+            self.color = 'silver'
+            canvas.delete(self.id)
+            self.id = canvas.create_rectangle(self.x1, self.y1, self.width, self.height, fill=self.color)
+        if self.color == 'red':
+            ball2 = Ball(canvas, paddle, 'red', block_list)
+            ball2.draw()
+            self.color = 'gold'
+            canvas.delete(self.id)
+            self.id = canvas.create_rectangle(self.x1, self.y1, self.width, self.height, fill=self.color)
         
 
 paddle = Paddle(canvas, 'blue')
-block1 = Block(canvas, 200, 100, 100, 50, 0, 0, 'brown')
-block2 = Block(canvas, 400, 100, 300, 50, 3, 0, 'brown')
-block3 = Block(canvas, 600, 100, 500, 50, 3, 0, 'brown')
-block4 = Block(canvas, 800, 100, 700, 50, 3, 0, 'brown')
-block5 = Block(canvas, 1000, 100, 900, 50, 3, 0, 'brown')
-block6 = Block(canvas, 1200, 100, 1100, 50, 3, 0, 'brown')
+block1 = Block(canvas, 200, 100, 100, 90, 3, 0, 'brown')
+block2 = Block(canvas, 400, 100, 300, 90, 3, 0, 'silver')
+block3 = Block(canvas, 600, 100, 500, 90, 3, 0, 'gold')
+block4 = Block(canvas, 800, 100, 700, 90, 3, 0, 'silver')
+block5 = Block(canvas, 1000, 100, 900, 90, 3, 0, 'brown')
+block6 = Block(canvas, 1200, 100, 1100, 90, 3, 0, 'silver')
 block_list = [block1, block2, block3, block4, block5, block6]
 ball = Ball(canvas, paddle, 'red', block_list)
 
 while 1:
+    if ball.hit_bottom == False and paddle.started == False:
+        Id = canvas.create_text(600, 600, text="Click to start", fill='black')
     if ball.hit_bottom == False and paddle.started:
+        canvas.delete(Id)
         ball.draw()
         paddle.draw()
+        x = 0
+        length = len(block_list)
+        while x < length:
+            block_list[x].draw
+            x += 1
     if ball.hit_bottom == True:
         raise
     tk.update_idletasks()
