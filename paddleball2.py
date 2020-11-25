@@ -9,11 +9,13 @@ tk.wm_attributes("-topmost", 1)
 canvas = Canvas(tk, width=1225, height=650, bd=0, highlightthickness=0)
 canvas.pack()
 tk.update()
+hits = 0
 
 class Ball:
     def __init__(self, canvas, paddle, color, block_list):
         self.canvas = canvas
         self.paddle = paddle
+        #self.score = score
         self.block_list = block_list
         self.id = canvas.create_oval(10, 10, 25, 25, fill=color)
         self.canvas.move(self.id, 600, 300)
@@ -48,6 +50,7 @@ class Ball:
             if pos[3] >= paddle_pos[1] and pos[3] <= paddle_pos[3]:
                 self.y = -1
                 self.x += self.paddle.x
+                self.score.hit()
                 return True
         return False
 
@@ -61,6 +64,7 @@ class Ball:
                     if pos[1] <= block_pos[3] and pos[3] >= block_pos[3]:
                         self.y = 1
                         block_list[x].hitted()
+                        #self.score.hit()
                         return True
             x += 1
         return False
@@ -75,6 +79,7 @@ class Ball:
                     if pos[3] >= block_pos[1] and pos[1] <= block_pos[1]:
                         self.y = -1
                         block_list[x].hitted()
+                        #self.score.hit()
                         return True
             x += 1
         return False
@@ -89,6 +94,7 @@ class Ball:
                     if pos[2] >= block_pos[0] and pos[0] <= block_pos[0]:
                         self.x = 1
                         block_list[x].hitted()
+                        #self.score.hit()
                         return True
             x += 1
         return False
@@ -103,6 +109,7 @@ class Ball:
                     if pos[0] <= block_pos[2] and pos[2] >= block_pos[2]:
                         self.x = -1
                         block_list[x].hitted()
+                        #self.score.hit()
                         return True
             x += 1
         return False
@@ -165,26 +172,33 @@ class Block:
     def draw(self):
         canvas.move(self.id, self.x, self.y)
         ball2.draw()
+    
     def hitted(self):
         if self.color == 'brown':
             canvas.delete(self.id)
             self.shown = False
         if self.color == 'silver':
-            self.color = 'brown'
             canvas.delete(self.id)
-            self.id = canvas.create_rectangle(self.x1, self.y1, self.width, self.height, fill=self.color)
+            canvas.create_rectangle(x1, y1, width, height, fill='brown')
         if self.color == 'gold':
-            self.color = 'silver'
             canvas.delete(self.id)
-            self.id = canvas.create_rectangle(self.x1, self.y1, self.width, self.height, fill=self.color)
+            canvas.create_rectangle(x1, y1, width, height, fill='silver')
         if self.color == 'red':
             ball2 = Ball(canvas, paddle, 'red', block_list)
             ball2.draw()
-            self.color = 'gold'
             canvas.delete(self.id)
-            self.id = canvas.create_rectangle(self.x1, self.y1, self.width, self.height, fill=self.color)
-        
+            canvas.create_rectangle(x1, y1, width, height, fill=gold)
 
+#    class Score:
+#        def __init__(self, canvas, color):
+#            self.score = 0
+#            self.canvas = canvas
+#            self.id = canvas.create_text(600, 10, text=self.score, fill=color)
+#        def hit(self):
+#            self.score += 1
+#            self.canvas.itemconfig(self.id, text=self.score)
+        
+#score = Score(canvas, 'green')
 paddle = Paddle(canvas, 'blue')
 block1 = Block(canvas, 200, 100, 100, 90, 3, 0, 'brown')
 block2 = Block(canvas, 400, 100, 300, 90, 3, 0, 'silver')
@@ -211,4 +225,4 @@ while 1:
         raise
     tk.update_idletasks()
     tk.update()
-    time.sleep(0.003333333)
+    time.sleep(0.004)
