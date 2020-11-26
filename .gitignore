@@ -1,2 +1,4 @@
 venv/
 .idea/
+brick.py
+newgame.py
