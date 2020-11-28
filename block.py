@@ -19,7 +19,7 @@ class BaseObj(object):
 class Paddle(BaseObj):
     def __init__(self, canvas, x, y):
         self.width = 80
-        self.height = 10
+        self.height = self.width/8
         self.ball = None
         self.started = False
         id = canvas.create_rectangle(x - self.width / 2,
@@ -96,7 +96,7 @@ class Block(BaseObj):
 
     def __init__(self, canvas, x, y, hits = 1):
         self.width = 40
-        self.height = 20
+        self.height = self.width/2
         self.hits = hits
         color = Block.COLORS[hits]
         id = canvas.create_rectangle(x - self.width / 2,
@@ -117,7 +117,7 @@ class Block(BaseObj):
 class Game(tk.Frame):
     def __init__(self, master):
         super(Game, self).__init__(master)
-        self.liveballs = 3
+        self.availible_balls = 3
         self.level = 1
         self.width = 610
         self.height = 400
@@ -133,7 +133,7 @@ class Game(tk.Frame):
         self.objs[self.paddle.id] = self.paddle
         self.level_depl(self.level)
 
-        self.hud = None
+        self.info = None
         self.setup_game()
         self.canvas.focus_set()
         self.canvas.bind("<Motion>", self.mouse_hand)
@@ -145,10 +145,12 @@ class Game(tk.Frame):
            self.add_ball()
            self.update_lives_text()
            self.text = self.draw_text(300, 200,
-                                      'Left click mouse to start')
+                                      'Click to start')
            self.canvas.bind('<Button-1>', lambda _: self.start_game())
 
     def add_ball(self):
+        for id, ball in self.balls.items():
+            ball.delete()
         if len(self.balls) > 0:
             self.balls.clear()
         paddle_coords = self.paddle.get_position()
@@ -158,12 +160,32 @@ class Game(tk.Frame):
         self.paddle.set_ball(ball)
 
     def level_depl(self, level):
-        if level == 1:
+        if level == 2:
             for x in range(5, self.width - 5, 75):
                 self.add_block(x + 37.5, 50, 2)
-                self.add_block(x + 37.5, 70, 1)
+                self.add_block(x + 37.5, 80, 1)
+                self.add_block(x + 37.5, 110, 1)
+
+        if level == 3:
+            for x in range(5, self.width - 5, 75):
+                self.add_block(x + 37.5, 50, 3)
+                self.add_block(x + 37.5, 70, 2)
                 self.add_block(x + 37.5, 90, 1)
 
+        if level == 4:
+            for x in range(5, self.width - 5, 75):
+                self.add_block(x + 37.5, 50, 3)
+                self.add_block(x + 37.5, 70, 3)
+                self.add_block(x + 37.5, 90, 3)
+
+        if level == 1:
+            for x in range(5, self.width-75, 40):
+                self.add_block(x + 37.5, 50, 1)
+                self.add_block(x + 37.5, 70, 1)
+                self.add_block(x + 37.5, 90, 1)
+                self.add_block(x + 37.5, 110, 1)
+                self.add_block(x + 37.5, 130, 1)
+                self.add_block(x + 37.5, 150, 1)
     def add_block(self, x, y, hits):
         block = Block(self.canvas, x, y, hits)
         self.objs[block.id] = block
@@ -174,11 +196,11 @@ class Game(tk.Frame):
                                        font=font)
 
     def update_lives_text(self):
-        text = 'Balls: %s' % self.liveballs
-        if self.hud is None:
-            self.hud = self.draw_text(50, 20, text, 15)
+        text = 'Level: %s | Extra Balls: %s' %(self.level, self.availible_balls)
+        if self.info is None:
+            self.info = self.draw_text(120, 20, text, 15)
         else:
-            self.canvas.itemconfig(self.hud, text=text)
+            self.canvas.itemconfig(self.info, text=text)
 
     def start_game(self):
         self.canvas.unbind('<Button-1>')
@@ -188,11 +210,14 @@ class Game(tk.Frame):
 
     def reset_ballsspeed(self):
         for id, ball in self.balls.items():
-            ball.speedx = None
+            ball.rate = None
 
     def check_activeballs(self):
-        self.balls = {id: ball for id, ball in self.balls.items()
-                      if ball.get_position()[3] < self.height}
+        deadballs = {id: ball for id, ball in self.balls.items()
+                      if ball.get_position()[3] >= self.height}
+        for id in deadballs.keys():
+            self.balls.pop(id)
+            deadballs[id].delete()
         return len(self.balls)
 
     def update_balls(self):
@@ -203,12 +228,15 @@ class Game(tk.Frame):
         self.check_collisions()
         num_Blocks = len(self.canvas.find_withtag('Block'))
         if num_Blocks == 0:
-            self.reset_ballsspeed()
-            self.draw_text(300, 200, 'You win!')
+            self.level += 1
+            self.level_depl(self.level)
+            self.setup_game()
+            self.start_game()
+            self.availible_balls += self.level
         elif self.check_activeballs() == 0:
-            self.liveballs -= 1
-            if self.liveballs < 0:
-                self.draw_text(300, 200, 'You Lose!!! Game Over!')
+            self.availible_balls -= 1
+            if self.availible_balls < 0:
+                self.draw_text(300, 200, 'You Lose! Game Over!')
             else:
                 self.after(1000, self.setup_game)
         else:
@@ -226,6 +254,6 @@ class Game(tk.Frame):
 
 if __name__ == '__main__':
     root = tk.Tk()
-    root.title('Hello, Yuhang!')
+    root.title('Ball Game')
     game = Game(root)
     game.mainloop()
