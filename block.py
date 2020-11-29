@@ -1,4 +1,5 @@
 import tkinter as tk
+import time
 
 
 class BaseObj(object):
@@ -26,7 +27,7 @@ class Paddle(BaseObj):
                                      y - self.height / 2,
                                      x + self.width / 2,
                                      y + self.height / 2,
-                                     fill='yellow')
+                                     fill='silver')
         super(Paddle, self).__init__(canvas, id)
 
     def set_ball(self, ball):
@@ -92,7 +93,7 @@ class Ball(BaseObj):
 
 
 class Block(BaseObj):
-    COLORS = {1: '#e74c3c', 2: '#3498db', 3: '#222222'}
+    COLORS = {1: '#e74c3c', 2: '#3498db', 3: '#000000'}
 
     def __init__(self, canvas, x, y, hits = 1):
         self.width = 40
@@ -123,7 +124,7 @@ class Game(tk.Frame):
         self.height = 400
         self.canvas = tk.Canvas(self, bg='#aaaaff',
                                 width=self.width,
-                                height=self.height,)
+                                height=self.height)
         self.canvas.pack()
         self.pack()
 
@@ -160,9 +161,10 @@ class Game(tk.Frame):
         self.paddle.set_ball(ball)
 
     def level_depl(self, level):
-        if level == 2:
+        if level == 1:
+            self.canvas.create_text(305, 300, text="Red blocks will be killed automatically when you hit it.")
             for x in range(5, self.width - 5, 75):
-                self.add_block(x + 37.5, 50, 2)
+                self.add_block(x + 37.5, 50, 1)
                 self.add_block(x + 37.5, 80, 1)
                 self.add_block(x + 37.5, 110, 1)
 
@@ -173,19 +175,32 @@ class Game(tk.Frame):
                 self.add_block(x + 37.5, 90, 1)
 
         if level == 4:
-            for x in range(5, self.width - 5, 75):
-                self.add_block(x + 37.5, 50, 3)
-                self.add_block(x + 37.5, 70, 3)
-                self.add_block(x + 37.5, 90, 3)
+            self.add_block(305, 50, 3)
+            self.add_block(325, 70, 3)
+            self.add_block(285, 70, 3)
+            self.add_block(265, 90, 3)
+            self.add_block(305, 90, 1)
+            self.add_block(345, 90, 3)
+            self.add_block(325, 110, 3)
+            self.add_block(285, 110, 3)
+            self.add_block(365, 110, 3)
+            self.add_block(245, 110, 3)
+            self.add_block(265, 130, 3)
+            self.add_block(305, 130, 3)
+            self.add_block(345, 130, 3)
+            self.add_block(225, 130, 3)
+            self.add_block(385, 130, 3)
 
-        if level == 1:
+
+        if level == 2:
+            self.canvas.create_text(305, 300, text="Blue blocks turn into red blocks, and black ones turn into blue blocks.")
             for x in range(5, self.width-75, 40):
-                self.add_block(x + 37.5, 50, 1)
-                self.add_block(x + 37.5, 70, 1)
+                self.add_block(x + 37.5, 50, 3)
+                self.add_block(x + 37.5, 70, 2)
                 self.add_block(x + 37.5, 90, 1)
-                self.add_block(x + 37.5, 110, 1)
+                self.add_block(x + 37.5, 110, 2)
                 self.add_block(x + 37.5, 130, 1)
-                self.add_block(x + 37.5, 150, 1)
+                self.add_block(x + 37.5, 150, 2)
     def add_block(self, x, y, hits):
         block = Block(self.canvas, x, y, hits)
         self.objs[block.id] = block
@@ -228,15 +243,18 @@ class Game(tk.Frame):
         self.check_collisions()
         num_Blocks = len(self.canvas.find_withtag('Block'))
         if num_Blocks == 0:
-            self.level += 1
-            self.level_depl(self.level)
-            self.setup_game()
-            self.start_game()
-            self.availible_balls += self.level
+            if self.level != 4:
+                self.availible_balls += 2
+                self.level += 1
+                self.level_depl(self.level)
+                self.setup_game()
+                time.sleep(1)
+                self.start_game()
         elif self.check_activeballs() == 0:
             self.availible_balls -= 1
             if self.availible_balls < 0:
-                self.draw_text(300, 200, 'You Lose! Game Over!')
+                self.draw_text(300, 200, '''  You Lose!
+Game Over!''')
             else:
                 self.after(1000, self.setup_game)
         else:
